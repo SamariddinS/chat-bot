@@ -1,0 +1,7 @@
+.log
+.tmp
+.eslintrc.cjs
+Thumbs.db
+/node_modules
+/packages
+/.vscode
