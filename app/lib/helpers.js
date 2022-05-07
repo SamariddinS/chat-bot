@@ -1,66 +1,7 @@
-const common = {
-    "hello": [
-        "hi",
-        "hello"
-    ],
-    "hi": [
-        "hi",
-        "hello"
-    ],
-    "who are you": [
-        "I'm chatbot"
-    ],
-    "what can you do": [
-        "i can talk with you, until my vocabulary runs out"
-    ],
-    "nice to meet you": [
-        "me too",
-        "and me too"
-    ],
-    "who created you": [
-        "My creator is Samariddin Sayfiddinov",
-        "his name is Samariddin",
-        "My developer is Samariddin"
-    ],
-    "good bay": [
-        "bay bay",
-        "see you",
-        "have a nice day",
-        "ok"
-    ],
-    "bay": [
-        "bay bay",
-        "good bay",
-        "have a nice day",
-        "ok"
-    ],
-};
-
-const command = {
-    "find": {
-        "information": {
-            "project": {
-                "studybook": ["hello world"],
-                "student helper": ["Information about student helper project"],
-                "native cli on node": ["Information about 'native cli on node' project"]
-            },
-            "free time": ["on weekend"]
-        },
-        "project": "studybook, student helper, native cli on node",
-        "file": "text.txt, pdf.pdf"
-    },
-
-    "create": {
-        "project": {
-            "react": ["react project was created"],
-            "python": ["python project was created"]
-        }
-    }
-};
+import { command, common } from '../data/data.js'
 
 class Chatbot {
-    constructor(dict, common, command) {
-        this.dict = dict;
+    constructor(common, command) {
         this.common = common;
         this.command = command;
     };
@@ -83,7 +24,7 @@ class Chatbot {
         return rValue;
     }
 
-    createTree(obj) {
+    createTree(obj = this.command) {
         // если нет дочерних элементов, то вызов возвращает undefined
         // и элемент <ul> не будет создан
         if (typeof Object.keys(obj) === 'number') return 0;
@@ -107,47 +48,67 @@ class Chatbot {
         return ul;
     };
 
-    searchAnswer(obj, query) {
+    searchAnswer(query, obj = this.common) {
+        query = query.toLowerCase();
         for (const key in obj) {
             if (query == key) {
                 return this.randArr(obj[key]);
             }
         }
+        return null;
     };
 
-    searchTree(obj, tree) {
-        getProp(obj);
+    searchTree(tree, obj = this.command) {
+        let backed;
 
         function getProp(o) {
             for (let i = 0; i < tree.length; i++) {
                 for (let prop in o) {
                     if (typeof(o[prop]) === 'object' && prop == tree[i]) {
-                        getProp(o[prop]);
-                    } else if (prop == tree[i]) {
-                        console.log('Answer: ', o[prop]);
+                        if (!Array.isArray(o[prop])) {
+                            backed = getProp(o[prop]);
+                        } else {
+                            o[prop] = o[prop].join(', ');
+
+                            return prop + ': ' + o[prop];
+                        }
+
+                        return backed;
+                    } else {
+                        continue;
                     }
                 }
             }
-        }
-    }
+        };
+
+        return getProp(obj);
+    };
 
     getAnswer(talk) {
-        this.common;
-        this.command;
-        this.tokenizer(talk);
+        const tree = this.tokenizer(talk);
+        const res = [];
+        let answer;
+        let n = 0;
 
+        for (let i = 0; i < tree.length; i++) {
+            answer = this.searchAnswer(tree[i])
+            if (answer) {
+                res[n] = answer;
+                n++;
+                break;
+            }
+        };
 
+        res[n] = this.searchTree(tree);
 
-
+        return res.join(', ');
     };
 };
 
-const bot = new Chatbot();
+const bot = new Chatbot(common, command);
 
-const trees = bot.createTree(command);
+const trees = bot.createTree();
 
-let text = 'Hi, please find me information about my project studybook';
+let text = 'Hi, find me my project';
 
-console.log(getAnswer(text));
-// console.log(bot.searchAnswer(common, text));
-// console.log(bot.search(common, tree));
+console.log(bot.getAnswer(text));

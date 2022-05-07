@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "Creating RESTful API CLI",
     "main": "index.js",
+    "type": "module",
     "scripts": {
         "start": "node ./app/index.js",
         "debug-server": "NODE_DEBUG=server node ./app/index.js",
