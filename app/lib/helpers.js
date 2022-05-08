@@ -65,6 +65,8 @@ class Chatbot {
             for (let i = 0; i < tree.length; i++) {
                 for (let prop in o) {
                     if (typeof(o[prop]) === 'object' && prop == tree[i]) {
+                        tree = tree.slice(i);
+
                         if (!Array.isArray(o[prop])) {
                             backed = getProp(o[prop]);
                         } else {
@@ -91,15 +93,37 @@ class Chatbot {
         let n = 0;
 
         for (let i = 0; i < tree.length; i++) {
-            answer = this.searchAnswer(tree[i])
+            answer = this.searchAnswer(tree[i]);
             if (answer) {
                 res[n] = answer;
                 n++;
-                break;
+            }
+
+            if (i == tree.length - 1) {
+                answer = this.searchAnswer(talk);
+                if (answer && n > 0) {
+                    res[n] = answer;
+                    n++;
+                    break;
+                }
+
+                let temp = n;
+                talk.split(', ').forEach(e => {
+                    answer = this.searchAnswer(e);
+
+                    if (answer && temp == 0) {
+                        res[n] = answer;
+                        n++;
+                    }
+                    temp--;
+                });
             }
         };
 
-        res[n] = this.searchTree(tree);
+        answer = this.searchTree(tree);
+        if (answer) {
+            res[n] = answer;
+        }
 
         return res.join(', ');
     };
@@ -109,6 +133,6 @@ const bot = new Chatbot(common, command);
 
 const trees = bot.createTree();
 
-let text = 'Hi, find me my project';
+let text = 'hi, find me information about my project native-cli-on-node';
 
 console.log(bot.getAnswer(text));
